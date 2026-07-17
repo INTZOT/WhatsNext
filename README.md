@@ -1,4 +1,4 @@
-# Whatsnext
+# WhatsNext
 
 团队协作待办清单，支持三级权限管理与 Docker 一键部署。
 

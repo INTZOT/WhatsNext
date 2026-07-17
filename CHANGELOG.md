@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### 1.1.1 — Logo · 品牌
+
+**品牌**
+- 新增导航栏 Logo（`public/logo.png`），支持暗色模式自动反色（`dark:invert`）
+- 项目正式更名为 **WhatsNext**
+- 浏览器 favicon 配置（`src/app/icon.png`）
+- Open Graph 社交分享图片配置
+
 ### 1.1.0 — 看板 · 子任务 · 标签 · 任务详情
 
 **看板视图**

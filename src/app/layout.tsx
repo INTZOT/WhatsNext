@@ -15,8 +15,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Whatsnext — 团队待办清单",
+  title: "WhatsNext — 团队待办清单",
   description: "高效团队待办管理，支持三级权限控制",
+  icons: { icon: "/logo.png" },
+  openGraph: {
+    title: "WhatsNext — 团队待办清单",
+    description: "高效团队待办管理，支持三级权限控制",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({

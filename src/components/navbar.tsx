@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CheckSquare, LogOut, Moon, Sun, User } from "lucide-react";
+import { LogOut, Moon, Sun, User } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export function Navbar() {
@@ -31,8 +32,14 @@ export function Navbar() {
           href="/dashboard"
           className="flex items-center gap-2 font-semibold text-lg hover:opacity-80 transition-opacity"
         >
-          <CheckSquare className="size-5" />
-          <span className="hidden sm:inline">Whatsnext</span>
+          <Image
+            src="/logo.png"
+            alt="WhatsNext"
+            width={28}
+            height={28}
+            className="dark:invert"
+          />
+          <span className="hidden sm:inline">WhatsNext</span>
         </Link>
 
         <div className="flex items-center gap-2">
