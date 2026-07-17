@@ -13,7 +13,9 @@ export const registerSchema = z.object({
   password: z
     .string()
     .min(8, "密码至少 8 个字符")
-    .max(100),
+    .max(100)
+    .regex(/[A-Z]/, "密码需包含至少一个大写字母")
+    .regex(/[0-9]/, "密码需包含至少一个数字"),
 });
 
 export const loginSchema = z.object({

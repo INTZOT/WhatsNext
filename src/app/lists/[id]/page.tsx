@@ -724,7 +724,7 @@ function MemberManager({ listId, members, onUpdate }: {
     if (!searchQuery.trim()) return;
     setSearching(true); setError("");
     try {
-      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}`);
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(searchQuery)}&listId=${listId}`);
       if (res.ok) {
         const data: UserBrief[] = await res.json();
         // Filter out already existing members

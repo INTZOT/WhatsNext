@@ -20,18 +20,16 @@ export async function GET(
       return NextResponse.json({ error: "无权限" }, { status: 403 });
     }
 
+    // Only admins can see emails
+    const isAdmin = member.role === "creator" || member.role === "admin";
+    const userSelect = isAdmin
+      ? { id: true, name: true, username: true, email: true, avatarUrl: true }
+      : { id: true, name: true, username: true, email: false as const, avatarUrl: true };
+
     const members = await prisma.listMember.findMany({
       where: { listId: id },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            username: true,
-            email: true,
-            avatarUrl: true,
-          },
-        },
+        user: { select: userSelect },
       },
       orderBy: { joinedAt: "asc" },
     });

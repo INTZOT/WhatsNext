@@ -20,21 +20,18 @@ export async function GET(
       return NextResponse.json({ error: "无权限访问" }, { status: 403 });
     }
 
+    const isAdmin = member.role === "creator" || member.role === "admin";
+    const userSelect = isAdmin
+      ? { id: true, name: true, username: true, email: true, avatarUrl: true }
+      : { id: true, name: true, username: true, email: false as const, avatarUrl: true };
+
     const list = await prisma.todoList.findUnique({
       where: { id },
       include: {
         _count: { select: { tasks: true, members: true } },
         members: {
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                username: true,
-                email: true,
-                avatarUrl: true,
-              },
-            },
+            user: { select: userSelect },
           },
         },
       },

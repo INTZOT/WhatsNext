@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getMemberInfo, canManageMembers } from "@/lib/permissions";
 
-/** Search users by name, username, or email for member selection combobox */
+/** Search users by name, username, or email — admin-only for a specific list */
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
@@ -12,8 +13,18 @@ export async function GET(req: NextRequest) {
 
     const url = new URL(req.url);
     const query = url.searchParams.get("q");
+    const listId = url.searchParams.get("listId");
+
     if (!query || query.length < 1) {
       return NextResponse.json([]);
+    }
+
+    // Must be a list admin to search for users
+    if (listId) {
+      const member = await getMemberInfo(listId, session.user.id);
+      if (!canManageMembers(member)) {
+        return NextResponse.json({ error: "无权限" }, { status: 403 });
+      }
     }
 
     const users = await prisma.user.findMany({
@@ -26,9 +37,7 @@ export async function GET(req: NextRequest) {
               { email: { contains: query, mode: "insensitive" } },
             ],
           },
-          {
-            id: { not: session.user.id }, // Exclude self
-          },
+          { id: { not: session.user.id } },
         ],
       },
       select: {
