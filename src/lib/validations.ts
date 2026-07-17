@@ -83,6 +83,6 @@ export const taskQuerySchema = z.object({
 });
 
 export const createTagSchema = z.object({
-  name: z.string().min(1, "标签名不能为空").max(30),
+  name: z.string().min(1, "标签名不能为空").max(30).transform(v => v.trim()),
   color: z.string().optional(),
 });

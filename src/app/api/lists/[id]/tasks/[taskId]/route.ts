@@ -105,12 +105,21 @@ export async function PATCH(
           { status: 403 },
         );
       }
+      // Validate new assignee is a list member
+      if (parsed.data.assigneeId && parsed.data.assigneeId !== existingTask.assigneeId) {
+        const isMember = await prisma.listMember.findUnique({
+          where: { userId_listId: { userId: parsed.data.assigneeId, listId: id } },
+        });
+        if (!isMember) {
+          return NextResponse.json({ error: "负责人不在清单成员中" }, { status: 400 });
+        }
+      }
       updateData.assigneeId = parsed.data.assigneeId;
     }
 
     // Handle tags
     if (parsed.data.tagNames !== undefined) {
-      const tagNames = parsed.data.tagNames;
+      const tagNames = parsed.data.tagNames.map(n => n.trim()).filter(Boolean);
       // Delete existing tag connections
       await prisma.taskTag.deleteMany({ where: { taskId } });
       // Find or create tags and connect

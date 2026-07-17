@@ -22,7 +22,7 @@ export async function GET(
     }
 
     const url = new URL(req.url);
-    const query = taskQuerySchema.parse({
+    const parsedQuery = taskQuerySchema.safeParse({
       status: url.searchParams.get("status") || undefined,
       priority: url.searchParams.get("priority") || undefined,
       tagId: url.searchParams.get("tagId") || undefined,
@@ -31,6 +31,12 @@ export async function GET(
       sortBy: url.searchParams.get("sortBy") || "priority",
       sortOrder: url.searchParams.get("sortOrder") || "desc",
     });
+
+    if (!parsedQuery.success) {
+      return NextResponse.json({ error: "无效的查询参数" }, { status: 400 });
+    }
+
+    const query = parsedQuery.data;
 
     // Only return top-level tasks (no parentTaskId)
     const where: Prisma.TaskWhereInput = {
@@ -136,7 +142,7 @@ export async function POST(
     }
 
     // Handle tags: find or create
-    const tagNames = parsed.data.tagNames || [];
+    const tagNames = (parsed.data.tagNames || []).map(n => n.trim()).filter(Boolean);
     const tagConnections = await Promise.all(
       tagNames.map(async (name) => {
         const tag = await prisma.tag.upsert({
@@ -147,6 +153,27 @@ export async function POST(
         return { tagId: tag.id };
       }),
     );
+
+    // Validate assigneeId belongs to this list
+    if (parsed.data.assigneeId) {
+      const isAssigneeMember = await prisma.listMember.findUnique({
+        where: { userId_listId: { userId: parsed.data.assigneeId, listId: id } },
+      });
+      if (!isAssigneeMember) {
+        return NextResponse.json({ error: "负责人不在清单成员中" }, { status: 400 });
+      }
+    }
+
+    // Validate parentTaskId belongs to this list
+    if (parsed.data.parentTaskId) {
+      const parentTask = await prisma.task.findUnique({
+        where: { id: parsed.data.parentTaskId },
+        select: { listId: true },
+      });
+      if (!parentTask || parentTask.listId !== id) {
+        return NextResponse.json({ error: "父任务不属于此清单" }, { status: 400 });
+      }
+    }
 
     const task = await prisma.task.create({
       data: {
