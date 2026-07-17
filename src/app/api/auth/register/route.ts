@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: existingUser.email === email ? "邮箱已注册" : "用户名已被占用" },
+        { error: "邮箱或用户名已被注册" },
         { status: 409 },
       );
     }
