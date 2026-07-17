@@ -1,0 +1,11 @@
+Dockerfile
+.dockerignore
+node_modules
+.git
+.gitignore
+.next
+.env*
+!.env.example
+README.md
+CHANGELOG.md
+.agents
