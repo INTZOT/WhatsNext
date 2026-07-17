@@ -72,6 +72,7 @@ model TodoList {
 
   members ListMember[]
   tasks   Task[]
+  tags    Tag[]
 }
 
 model ListMember {
@@ -88,17 +89,44 @@ model ListMember {
 }
 
 model Task {
-  id        String   @id @default(cuid())
-  title     String
-  notes     String?  @db.Text
-  status    String   @default("todo") // "todo" | "in_progress" | "done"
-  priority  String   @default("medium") // "high" | "medium" | "low"
-  dueDate   DateTime?
-  listId    String
-  assigneeId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  title        String
+  notes        String?  @db.Text
+  status       String   @default("todo") // "todo" | "in_progress" | "done"
+  priority     String   @default("medium") // "high" | "medium" | "low"
+  dueDate      DateTime?
+  listId       String
+  assigneeId   String?
+  parentTaskId String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  list     TodoList @relation(fields: [listId], references: [id], onDelete: Cascade)
-  assignee User?    @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  list       TodoList   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  assignee   User?      @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  parentTask Task?      @relation("TaskSubtasks", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  childTasks Task[]     @relation("TaskSubtasks")
+
+  taskTags TaskTag[]
+}
+
+model Tag {
+  id     String   @id @default(cuid())
+  name   String
+  color  String?
+  listId String
+  list   TodoList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  taskTags TaskTag[]
+
+  @@unique([name, listId])
+}
+
+model TaskTag {
+  taskId String
+  tagId  String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
 }

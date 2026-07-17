@@ -114,7 +114,7 @@ export default function DashboardPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">我的清单</h1>
+            <h1 className="text-2xl font-bold"></h1>
             <p className="text-muted-foreground mt-1">
               欢迎回来，{session?.user?.name}
             </p>
@@ -141,6 +141,7 @@ export default function DashboardPage() {
                     placeholder="例如：Q3 研发计划"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
+                    maxLength={50}
                     required
                   />
                 </div>
@@ -151,6 +152,7 @@ export default function DashboardPage() {
                     placeholder="简要说明清单的用途"
                     value={newDesc}
                     onChange={(e) => setNewDesc(e.target.value)}
+                    maxLength={1000}
                   />
                 </div>
                 <Button type="submit" disabled={creating} className="w-full">
@@ -184,11 +186,11 @@ export default function DashboardPage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {lists.map((list) => (
               <Link key={list.id} href={`/lists/${list.id}`}>
-                <Card className="h-full cursor-pointer transition-shadow hover:shadow-md">
+                <Card className="h-full cursor-pointer transition-shadow hover:shadow-md overflow-hidden">
                   <CardHeader>
-                    <CardTitle className="text-lg">{list.name}</CardTitle>
+                    <CardTitle className="text-lg break-words">{list.name}</CardTitle>
                     {list.description && (
-                      <CardDescription className="line-clamp-2">
+                      <CardDescription className="line-clamp-2 break-words">
                         {list.description}
                       </CardDescription>
                     )}

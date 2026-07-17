@@ -69,17 +69,25 @@ export async function POST(
       );
     }
 
-    // Find user by query (username, name, or email)
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { username: { contains: parsed.data.query } },
-          { name: { contains: parsed.data.query } },
-          { email: { contains: parsed.data.query } },
-        ],
-      },
-      select: { id: true, name: true, username: true, email: true, avatarUrl: true },
-    });
+    // Find user by userId (exact) or query (fuzzy fallback)
+    let user;
+    if (parsed.data.userId) {
+      user = await prisma.user.findUnique({
+        where: { id: parsed.data.userId },
+        select: { id: true, name: true, username: true, email: true, avatarUrl: true },
+      });
+    } else if (parsed.data.query) {
+      user = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { username: { equals: parsed.data.query, mode: "insensitive" } },
+            { name: { contains: parsed.data.query } },
+            { email: { contains: parsed.data.query } },
+          ],
+        },
+        select: { id: true, name: true, username: true, email: true, avatarUrl: true },
+      });
+    }
 
     if (!user) {
       return NextResponse.json({ error: "未找到用户" }, { status: 404 });
