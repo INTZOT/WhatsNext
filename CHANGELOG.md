@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+### 1.1.2 — 安全加固
+
+**漏洞修复**
+- 成员邮箱仅管理员可见（GET members / GET list 端点）
+- 用户搜索端点限制为清单管理员，需传 `listId` 参数
+- 创建任务时验证 `assigneeId` 为清单成员
+- 创建任务时验证 `parentTaskId` 属于同一清单
+- PATCH 任务时验证新 `assigneeId` 为清单成员
+- 注册错误信息泛化，消除用户枚举漏洞
+
+**安全增强**
+- 密码复杂度要求：至少一个大写字母 + 一个数字
+- `taskQuerySchema` 改用 `.safeParse()` 防止 500 崩溃
+- 标签名统一 `.trim().filter(Boolean)` 处理
+- NextAuth 配置 `trustHost: true`（反向代理支持）
+- 添加 MIT 开源许可证
+
 ### 1.1.1 — Logo · 品牌
 
 **品牌**

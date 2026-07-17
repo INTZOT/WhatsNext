@@ -1,5 +1,7 @@
 # WhatsNext
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 团队协作待办清单，支持三级权限管理与 Docker 一键部署。
 
 ## 技术栈
