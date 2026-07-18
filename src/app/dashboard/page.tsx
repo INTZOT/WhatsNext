@@ -39,6 +39,10 @@ export default function DashboardPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [joinOpen, setJoinOpen] = useState(false);
+  const [joinId, setJoinId] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState("");
 
   useEffect(() => {
     if (status === "loading") return;
@@ -87,6 +91,32 @@ export default function DashboardPage() {
       console.error("Failed to create list", err);
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function joinList(e: React.FormEvent) {
+    e.preventDefault();
+    if (!joinId.trim()) return;
+    setJoining(true);
+    setJoinError("");
+    try {
+      const res = await fetch("/api/lists/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listId: joinId.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setJoinOpen(false);
+        setJoinId("");
+        fetchLists();
+      } else {
+        setJoinError(data.error || "加入失败");
+      }
+    } catch {
+      setJoinError("加入失败，请稍后重试");
+    } finally {
+      setJoining(false);
     }
   }
 
@@ -158,6 +188,42 @@ export default function DashboardPage() {
                 <Button type="submit" disabled={creating} className="w-full">
                   {creating && <Loader2 className="size-4 animate-spin" />}
                   {creating ? "创建中..." : "创建清单"}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Plus className="size-4" />
+                加入清单
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>加入清单</DialogTitle>
+                <DialogDescription>
+                  输入清单 ID 即可直接加入为参与者
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={joinList} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="listId">清单 ID</Label>
+                  <Input
+                    id="listId"
+                    placeholder="粘贴清单 ID"
+                    value={joinId}
+                    onChange={(e) => setJoinId(e.target.value)}
+                    required
+                  />
+                </div>
+                {joinError && (
+                  <p className="text-sm text-destructive">{joinError}</p>
+                )}
+                <Button type="submit" disabled={joining} className="w-full">
+                  {joining && <Loader2 className="size-4 animate-spin" />}
+                  {joining ? "加入中..." : "加入"}
                 </Button>
               </form>
             </DialogContent>

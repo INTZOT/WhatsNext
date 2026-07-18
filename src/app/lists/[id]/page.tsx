@@ -453,7 +453,7 @@ export default function ListDetailPage() {
                 </Dialog>
               )}
             </div>
-            {currentRole === "creator" && (
+            {currentRole === "creator" ? (
               <Button
                 variant="outline"
                 size="sm"
@@ -468,7 +468,44 @@ export default function ListDetailPage() {
               >
                 <Trash2 className="size-4" />删除清单
               </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                onClick={async () => {
+                  if (!confirm("确定要退出此清单吗？")) return;
+                  try {
+                    await fetch(`/api/lists/${listId}/leave`, { method: "DELETE" });
+                    router.push("/dashboard");
+                  } catch { alert("退出失败"); }
+                }}
+              >
+                <Trash2 className="size-4" />退出清单
+              </Button>
             )}
+            {/* List ID */}
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span>ID: {listId.slice(0, 8)}...</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5"
+                title="复制清单 ID"
+                onClick={() => {
+                  const ta = document.createElement("textarea");
+                  ta.value = listId;
+                  ta.style.position = "fixed";
+                  ta.style.opacity = "0";
+                  document.body.appendChild(ta);
+                  ta.select();
+                  document.execCommand("copy");
+                  document.body.removeChild(ta);
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              </Button>
+            </span>
           </div>
         </div>
 

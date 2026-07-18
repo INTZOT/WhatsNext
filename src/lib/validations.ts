@@ -27,7 +27,7 @@ export const loginSchema = z.object({
 
 export const createListSchema = z.object({
   name: z.string().min(1, "清单名称不能为空").max(50),
-  description: z.string().max(1000).optional(),
+  description: z.string().max(1000).nullable().optional(),
 });
 
 export const updateListSchema = z.object({
@@ -51,10 +51,13 @@ export const updateMemberRoleSchema = z.object({
 
 export const createTaskSchema = z.object({
   title: z.string().min(1, "任务标题不能为空").max(60),
-  notes: z.string().max(5000).optional(),
+  notes: z.string().max(5000).nullable().optional(),
   status: z.enum(["todo", "in_progress", "done"]).default("todo"),
   priority: z.enum(["high", "medium", "low"]).default("medium"),
-  dueDate: z.string().datetime().optional().nullable(),
+  dueDate: z.string().nullable().optional().transform((v) => {
+    if (!v || v === "") return null;
+    return new Date(v).toISOString();
+  }),
   assigneeId: z.string().optional().nullable(),
   parentTaskId: z.string().optional().nullable(),
   tagNames: z.array(z.string().max(30)).max(10).optional(),
@@ -62,10 +65,13 @@ export const createTaskSchema = z.object({
 
 export const updateTaskSchema = z.object({
   title: z.string().min(1).max(60).optional(),
-  notes: z.string().max(5000).optional(),
+  notes: z.string().max(5000).nullable().optional(),
   status: z.enum(["todo", "in_progress", "done"]).optional(),
   priority: z.enum(["high", "medium", "low"]).optional(),
-  dueDate: z.string().datetime().optional().nullable(),
+  dueDate: z.string().nullable().optional().transform((v) => {
+    if (!v || v === "") return null;
+    return new Date(v).toISOString();
+  }),
   assigneeId: z.string().optional().nullable(),
   tagNames: z.array(z.string().max(30)).max(10).optional(),
 });

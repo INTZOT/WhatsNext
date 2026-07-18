@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### 1.1.3 — 加入清单 · 退出清单 · 部署优化
+
+**新功能**
+- 仪表盘「加入清单」按钮：输入清单 ID 直接加入为参与者
+- 清单详情页「退出清单」按钮（管理者和参与者可退出）
+- 清单 ID 显示与一键复制
+- 新建任务支持描述字段
+
+**修复**
+- `dueDate` 和 `notes` 空值验证修复（Zod `.nullable().optional()`）
+- 登录页 `useSearchParams` Suspense 包裹
+- NextAuth `next-auth/jwt` 模块声明兼容性修复
+- ESLint `no-explicit-any` 降级为 warning
+- 复制按钮 HTTP 兼容（`document.execCommand` 回退）
+
 ### 1.1.2 — 安全加固
 
 **漏洞修复**
