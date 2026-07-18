@@ -2,87 +2,99 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-团队协作待办清单，支持三级权限管理与 Docker 一键部署。
+团队协作待办清单 — 多清单管理 · 三级权限 · 看板 · 子任务 · 标签 · Docker 一键部署
 
 ## 技术栈
 
 | 层 | 技术 |
 |---|------|
-| 框架 | Next.js 15 (App Router + RSC) |
-| 语言 | TypeScript (Strict Mode) |
-| 样式 | Tailwind CSS + shadcn/ui |
+| 框架 | Next.js 15 (App Router) |
+| 语言 | TypeScript |
+| 样式 | Tailwind CSS 4 + shadcn/ui |
 | 数据库 | PostgreSQL + Prisma ORM |
-| 认证 | NextAuth.js v5 (邮箱密码登录) |
-| 部署 | Docker Compose 一行部署 |
+| 认证 | NextAuth.js v5 (邮箱密码) |
+| 部署 | Docker Compose / 原生 Node.js |
 | 包管理 | pnpm |
 
 ## 功能
 
-- **多清单管理** — 创建多个独立待办清单，每个清单独立管理成员与权限
-- **三级权限** — 创建者（完全控制）/ 管理者（管理任务与成员）/ 参与者（操作自己负责的任务）
-- **任务操作** — CRUD + 固定三态（待办/进行中/已完成）+ 优先级（高/中/低）+ 截止日期 + 指派负责人 + 任务描述
-- **看板视图** — 三列看板（待办/进行中/已完成），列表/看板一键切换
-- **子任务** — 一层嵌套子任务，折叠展示，父任务完成自动级联子任务
-- **标签系统** — 清单级别标签，内联创建/删除，支持标签筛选
-- **任务详情页** — 点击任务卡片进入，完整编辑所有属性、管理子任务
-- **智能筛选** — 按状态/标签筛选、按优先级/截止日期排序、「只看我的」一键切换、标题搜索
-- **成员管理** — 组合搜索（用户名/显示名/邮箱）添加成员，实时分配角色
-- **响应式布局** — 桌面/平板/手机全适配
-
-## 快速部署
-
-```bash
-# 1. 克隆并进入项目
-git clone <repo-url> && cd Whatsnext
-
-# 2. 一键启动（需已安装 Docker 和 Docker Compose）
-docker compose up -d
-
-# 3. 访问 http://localhost:3000
-```
-
-首次启动会自动执行数据库迁移。默认不创建管理员账户，请通过注册页面创建第一个用户。
-
-## 环境变量
-
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| `DATABASE_URL` | PostgreSQL 连接串 | `postgresql://postgres:postgres@db:5432/whatsnext` |
-| `AUTH_SECRET` | NextAuth 密钥 | 随机生成（生产环境请固定） |
-| `AUTH_URL` | 站点地址 | `http://localhost:3000` |
+- **多清单管理** — 独立清单，独立权限，独立标签
+- **三级权限** — 创建者 / 管理者 / 参与者
+- **看板视图** — 三列看板，列表/看板一键切换
+- **子任务** — 嵌套折叠，完成级联
+- **标签系统** — 内联创建，支持筛选
+- **任务详情** — 完整属性编辑，描述，子任务管理
+- **加入/退出** — ID 分享加入，一键退出
+- **暗色模式** — 自动跟随系统
 
 ## 权限模型
 
 | 操作 | 创建者 | 管理者 | 参与者 |
-|------|--------|--------|--------|
+|------|:---:|:---:|:---:|
 | 删除清单 | ✅ | ❌ | ❌ |
-| 修改清单名称/描述 | ✅ | ✅ | ❌ |
-| 添加/移除成员 | ✅ | ✅ | ❌ |
-| 修改成员角色 | ✅ | ❌ | ❌ |
-| 创建任务 | ✅ | ✅ | ✅ |
+| 修改清单 | ✅ | ✅ | ❌ |
+| 管理成员 | ✅ | ✅ | ❌ |
 | 编辑/删除任务 | ✅ | ✅ | ❌ |
-| 切换任务状态 | ✅ | ✅ | ✅ |
-| 指派负责人 | ✅ | ✅ | ❌ |
-| 删除子任务 | ✅ | ✅ | ❌ |
+| 创建任务 | ✅ | ✅ | ✅ |
+| 切换状态 | ✅ | ✅ | ✅ |
+| 退出清单 | ❌ | ✅ | ✅ |
 
-## 开发
+---
+
+## 部署
+
+### Docker Compose
 
 ```bash
-# 安装依赖
+git clone https://github.com/INTZOT/WhatsNext.git && cd WhatsNext
+
+# 生成 AUTH_SECRET
+openssl rand -base64 32
+# Windows: powershell -Command "-join ((48..57)+(65..90)+(97..122)|Get-Random -Count 32|%{[char]$_})"
+
+# 创建 .env（替换下面尖括号内容）
+cat > .env << 'EOF'
+DATABASE_URL="postgresql://postgres:postgres@db:5432/whatsnext"
+AUTH_SECRET=你生成的密钥
+AUTH_URL=http://你的IP:3000
+EOF
+
+# 启动
+docker compose up -d
+```
+
+### 本地部署
+
+**前提**：Node.js 22+、PostgreSQL 16+、pnpm
+
+```bash
+git clone https://github.com/INTZOT/WhatsNext.git && cd WhatsNext
 pnpm install
 
-# 启动开发数据库（仅 DB 容器）
-docker compose up db -d
+# 创建数据库
+createdb whatsnext
+# Windows: pgAdmin → Databases → Create → whatsnext
 
-# 同步数据库迁移
-pnpm prisma:migrate
+# 配置 .env
+cp .env.example .env
+# 编辑 DATABASE_URL 指向本地 PostgreSQL
 
-# 启动开发服务器
-pnpm dev
-
-# 打开浏览器
-open http://localhost:3000
+# 迁移 + 构建 + 启动
+pnpm prisma:generate
+pnpm prisma:migrate dev --name init
+pnpm build
+pnpm start
 ```
+
+开发模式（热更新）：`pnpm dev`
+
+## 环境变量
+
+| 变量 | 说明 |
+|------|------|
+| `DATABASE_URL` | PostgreSQL 连接串 |
+| `AUTH_SECRET` | 加密密钥 (`openssl rand -base64 32`) |
+| `AUTH_URL` | 站点地址 (`http://ip:3000`) |
 
 ## License
 
