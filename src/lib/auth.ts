@@ -13,9 +13,13 @@ declare module "next-auth" {
   }
 }
 
+/** 登录保持时长：14 天（单位秒）。中间件每次请求都会续签，即 14 天不活动才过期。 */
+const SESSION_MAX_AGE = 14 * 24 * 60 * 60;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: SESSION_MAX_AGE },
+  jwt: { maxAge: SESSION_MAX_AGE },
   trustHost: true,
   pages: {
     signIn: "/login",
