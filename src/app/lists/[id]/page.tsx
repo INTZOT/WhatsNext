@@ -434,24 +434,23 @@ export default function ListDetailPage() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setMemberDialogOpen(true)}>
-                <Users className="size-4" />
-                <span className="hidden sm:inline">{list._count.members} 成员</span>
-              </Button>
-              {isAdmin && (
-                <Dialog open={memberDialogOpen} onOpenChange={setMemberDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline"><UserPlus className="size-4" /><span className="hidden sm:inline">管理成员</span></Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>管理成员</DialogTitle>
-                      <DialogDescription>添加或管理清单成员及权限</DialogDescription>
-                    </DialogHeader>
-                    <MemberManager listId={listId} members={list.members} onUpdate={fetchData} />
-                  </DialogContent>
-                </Dialog>
-              )}
+              <Dialog open={memberDialogOpen} onOpenChange={setMemberDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <Users className="size-4" />
+                    <span className="hidden sm:inline">{list._count.members} 成员</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{isAdmin ? "管理成员" : "成员列表"}</DialogTitle>
+                    <DialogDescription>
+                      {isAdmin ? "添加或管理清单成员及权限" : "查看清单成员"}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <MemberManager listId={listId} members={list.members} isAdmin={isAdmin} onUpdate={fetchData} />
+                </DialogContent>
+              </Dialog>
             </div>
             {currentRole === "creator" ? (
               <Button
@@ -746,9 +745,10 @@ function ViewToggle({ isBoard, onToggle }: { isBoard: boolean; onToggle: () => v
 
 // ===== Member Manager =====
 
-function MemberManager({ listId, members, onUpdate }: {
+function MemberManager({ listId, members, isAdmin, onUpdate }: {
   listId: string;
   members: ListData["members"];
+  isAdmin: boolean;
   onUpdate: () => void;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -812,7 +812,7 @@ function MemberManager({ listId, members, onUpdate }: {
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="text-xs">{ROLE_LABELS[m.role]}</Badge>
-              {m.role !== "creator" && (
+              {isAdmin && m.role !== "creator" && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="size-3.5" /></Button></DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
@@ -826,8 +826,9 @@ function MemberManager({ listId, members, onUpdate }: {
           </div>
         ))}
       </div>
-      <div className="space-y-2 border-t pt-4">
-        <Label className="text-xs text-muted-foreground">添加成员</Label>
+      {isAdmin && (
+        <div className="space-y-2 border-t pt-4">
+          <Label className="text-xs text-muted-foreground">添加成员</Label>
         <div className="flex gap-2">
           <Input placeholder="搜索用户名、姓名或邮箱..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} onKeyDown={e => e.key === "Enter" && searchUsers()} />
           <Select value={selectedRole} onValueChange={v => setSelectedRole(v as "admin"|"member")}>
@@ -850,6 +851,7 @@ function MemberManager({ listId, members, onUpdate }: {
           </div>
         ))}
       </div>
+      )}
     </div>
   );
 }
