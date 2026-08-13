@@ -31,7 +31,8 @@ pnpm-debug.log*
 next-env.d.ts
 
 # prisma
-prisma/migrations/
+# 注意: 迁移文件必须提交, 否则全新部署时 migrate deploy 找不到迁移记录
+# (2026-08 修复: 已取消忽略 prisma/migrations/)
 
 # skills
 .agents/
